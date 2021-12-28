@@ -22,7 +22,7 @@ async function getRepo(path, remote, branch) {
   // our config has changed because Gatsby trashes the cache dir automatically
   // in that case.
   if (!fs.existsSync(path) || fs.readdirSync(path).length === 0) {
-    let opts = [`--depth`, `1`];
+    let opts = [];
     if (typeof branch == `string`) {
       opts.push(`--branch`, branch);
     }
@@ -33,7 +33,7 @@ async function getRepo(path, remote, branch) {
     const target = await getTargetBranch(repo, branch);
     // Refresh our shallow clone with the latest commit.
     await repo
-      .fetch([`--depth`, `1`])
+      .fetch()
       .then(() => repo.reset([`--hard`, target]));
     return repo;
   } else {
@@ -66,7 +66,7 @@ exports.sourceNodes = async (
   } catch (e) {
     return reporter.error(e);
   }
-
+  
   parsedRemote.git_suffix = false;
   parsedRemote.webLink = parsedRemote.toString("https");
   delete parsedRemote.git_suffix;
@@ -101,6 +101,19 @@ exports.sourceNodes = async (
       name: name,
       path: localPath
     }).then(fileNode => {
+
+      repo.log({
+        file: fileNode.relativePath,
+        maxCount: 1
+      })
+      .then(log => {
+        const { date, author_name, author_email } = log.latest;
+
+        fileNode.lastCommitDate = date;
+        fileNode.lastCommitAuthorName = author_name;
+        fileNode.lastCommitAuthorEmail = author_email;
+      })
+
       // Add a link to the git remote node
       fileNode.gitRemote___NODE = remoteId;
       // Then create the node, as if it were created by the gatsby-source
