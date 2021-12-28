@@ -1,3 +1,4 @@
+Forked from : [`gatsby-source-git`](https://github.com/stevetweeddale/gatsby-source-git)
 # gatsby-source-git
 
 Source plugin for pulling files into the Gatsby graph from abitrary Git repositories (hosted anywhere). This is useful if the markdown files you wish to render can't live within your gatsby codebase, or if need to aggregate content from disparate repositories.
